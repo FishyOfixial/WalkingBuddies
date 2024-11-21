@@ -1,20 +1,40 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 
 const LoginScreen = ({ navigation }) => {
-  const initialState = { texto: "Bienvenido", email: "ivan@edu.uag.mx", password: "prueba", errorText: "" };
+  const initialState = { texto: "Bienvenido", email: "", password: "", errorText: "" };
   const [state, setState] = useState(initialState);
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const loginClick = () => {
     setState(prevState => ({ ...prevState, errorText: "" }));
-    const test_email = 'ivan@edu.uag.mx';
-    const test_pass = 'prueba';
-    if (state.email !== test_email || state.password !== test_pass) {
-      setState(prevState => ({ ...prevState, errorText: "El correo o contraseña son incorrectos" }));
-    } else {
-      navigation.navigate("AskBuddy");
-    }
+    
+    const auth = getAuth(); // Obtener la instancia de autenticación
+    signInWithEmailAndPassword(auth, state.email, state.password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+
+        if(user.emailVerified){
+          navigation.navigate("AskBuddy");
+        }
+        else{
+          alert("Por favor verifica tu correo eléctronico antes de inciar sesión.");
+          signOut(auth);
+        }
+      })
+      .catch((error) => {
+        // Error durante la autenticación
+        if (error.code === 'auth/user-not-found') {
+          setState(prevState => ({ ...prevState, errorText: "El usuario no existe" }));
+        } else if (error.code === 'auth/wrong-password') {
+          setState(prevState => ({ ...prevState, errorText: "Contraseña incorrecta" }));
+        } else if (error.code === 'auth/invalid-credential') {
+          setState(prevState => ({ ...prevState, errorText: "Credenciales inválidas. Verifica tu correo y contraseña." }));
+        } else {
+          setState(prevState => ({ ...prevState, errorText: "Ocurrió un error, intenta nuevamente" }));
+        }
+      });
   };
 
   const registerClick = () => {

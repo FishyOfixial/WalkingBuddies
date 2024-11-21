@@ -1,76 +1,75 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { database, ref, set, get } from './firebase'; // Importa las funciones de Firebase
+import { database, ref, set, get, auth } from './firebase';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import DateTimePicker from '@react-native-community/datetimepicker';
+
 
 const RegisterScreen = ({ navigation }) => {
   const initialState = { 
     texto: "", 
-    name: "Ivan", 
-    email: "ivan@edu.uag.mx", 
-    password: "aaa", 
-    bachelor: "Ing. Software", 
+    name: "", 
+    email: "", 
+    password: "", 
+    bachelor: "", 
     dateOfBirth: "", 
-    preferences: "Pan",
+    preferences: "",
     error: ""
   };
 
   const [state, setState] = useState(initialState);
   const [showPicker, setShowPicker] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(new Date(2006,2,8));
   const [isVolunteer, setIsVolunteer] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
 
   const loginClick = async () => {
     setState(prevState => ({ ...prevState, error: "" }));
     const errorMessage = checkEntries();
+  
     if (!errorMessage) {
-
-      const usersRef = ref(database, 'users');
-      const snapshot = await get(usersRef);
-
-      let emailExists = false;
-      if (snapshot.exists()) {
-        const users = snapshot.val();
-        emailExists = Object.values(users).some(user => user.email === state.email);
-      }
-
-      if (emailExists) {
+      try {
+        // Aquí usamos `createUserWithEmailAndPassword` directamente con el objeto `auth`
+        const userCredential = await createUserWithEmailAndPassword(auth, state.email, state.password);
+        const user = userCredential.user;
+  
+        // Enviar verificación de correo electrónico
+        await sendEmailVerification(user);
+        alert("Correo de verificación enviado. Por favor, revisa tu bandeja de entrada.");
+  
+        // Guardar el usuario en la base de datos después de la verificación
+        const userId = user.uid;
+        const age = calculateAge(state.dateOfBirth);
+        await set(ref(database, 'users/' + userId), {
+          id: userId,
+          name: state.name,
+          email: state.email,
+          bachelor: state.bachelor,
+          dateOfBirth: state.dateOfBirth.toString(),
+          age: age,
+          preferences: isVolunteer ? state.preferences : "",
+          profileImage: profileImage || require('../assets/Fishy-Mando.png'),
+          rating: 0,
+          isVolunteer: isVolunteer,
+          isInTrip: false,
+        });
+  
+        // Redirigir al usuario a la pantalla de inicio de sesión
+        navigation.navigate("Login");
+  
+      } catch (error) {
+        console.error("Código de error:", error.code);
+        console.error("Mensaje de error:", error.message);
         setState(prevState => ({
           ...prevState,
-          error: "El correo ya está registrado"
+          error: "Hubo un error al registrar el usuario."
         }));
-        return;
+        console.error('Error al registrar el usuario:', error);
       }
-
-      const age = calculateAge(state.dateOfBirth);
-      if(age < 17){
-        setState(prevState => ({...prevState, error: "Debes tener al menos 17 años para registrarte"}));
-        return;
-      }
-      const userId = Date.now();
-      await set(ref(database, 'users/' + userId), {
-        name: state.name,
-        email: state.email,
-        password: state.password, // Asegúrate de cifrar la contraseña en un entorno real
-        bachelor: state.bachelor,
-        dateOfBirth: state.dateOfBirth.toString(),
-        age: age,
-        preferences: isVolunteer ? state.preferences : "",
-        profileImage: profileImage || 'https://via.placeholder.com/100',
-        rating: 0,
-        isVolunteer: isVolunteer,
-      })
-      .then(() => {
-        console.log('Usuario agregado correctamente');
-        navigation.navigate("Login");
-      })
-      .catch((error) => {
-        console.error('Error al agregar el usuario:', error);
-      });
     }
   };
+  
 
   const showDatePicker = () => {
     setShowPicker(true);
