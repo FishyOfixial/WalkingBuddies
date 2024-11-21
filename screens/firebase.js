@@ -2,11 +2,12 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, get, set, push } from 'firebase/database';
 import { getAuth } from 'firebase/auth'; // Importa getAuth
+import { API_KEY, AUTH_DOMAIN } from '@env';
 
 // Tu configuración de Firebase
 const firebaseConfig = {
-    apiKey: "REPLACEMENT_API_KEY",
-    authDomain: "walkingbuddy-f8712.firebaseapp.com",
+    apiKey: API_KEY,
+    authDomain: AUTH_DOMAIN,
     projectId: "walkingbuddy-f8712",
     storageBucket: "walkingbuddy-f8712.firebasestorage.app",
     messagingSenderId: "289829473388",
