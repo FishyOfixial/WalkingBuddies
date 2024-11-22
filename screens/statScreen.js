@@ -1,4 +1,4 @@
-const statScreen = ({ navigation }) => {
+const StatScreen = ({ navigation }) => {
 };
 
-export default statScreen;
+export default StatScreen;

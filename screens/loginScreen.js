@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, update } from 'firebase/database';
+import { database } from './firebase';
+import styles from '../src/styles/loginStyles';
 
 const LoginScreen = ({ navigation }) => {
   const initialState = { texto: "Bienvenido", email: "", password: "", errorText: "" };
@@ -10,13 +13,21 @@ const LoginScreen = ({ navigation }) => {
   const loginClick = () => {
     setState(prevState => ({ ...prevState, errorText: "" }));
     
-    const auth = getAuth(); // Obtener la instancia de autenticación
+    const auth = getAuth();
     signInWithEmailAndPassword(auth, state.email, state.password)
       .then((userCredential) => {
         const user = userCredential.user;
 
         if(user.emailVerified){
-          navigation.navigate("AskBuddy");
+          update(ref(database, 'users/' + user.uid), {
+            isVerified: true
+          })
+          .then(() => {
+            navigation.navigate("AskBuddy");
+          })
+          .catch((error) => {
+            console.error("Error al actualizar isVerified: ", error);
+          });
         }
         else{
           alert("Por favor verifica tu correo eléctronico antes de inciar sesión.");
@@ -80,77 +91,5 @@ const LoginScreen = ({ navigation }) => {
     </TouchableWithoutFeedback>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f5f5f5'
-  },
-  welcomeText: {
-    fontSize: 18,
-    marginBottom: 20,
-    color: '#333'
-  },
-  input: {
-    width: '80%',
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginVertical: 10,
-    backgroundColor: '#fff'
-  },
-  passwordContainer: {
-    width: '80%',
-    position: 'relative',
-    marginVertical: 10,
-  },
-  inputPass: {
-    width: '100%',
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff'
-  },
-  toggleButton: {
-    position: 'absolute',
-    right: 10,
-    height: '100%',
-    justifyContent: 'center'
-  },
-  toggleText: {
-    color: '#007BFF',
-    fontSize: 14,
-  },
-  registerButton: {
-    marginTop: 10,
-  },
-  registerText: {
-    color: '#007BFF',
-    fontSize: 16,
-  },
-  loginButton: {
-    marginTop: 60,
-    width: '60%',
-    paddingVertical: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: '#FFF',
-    borderWidth: 2,
-    borderRadius: 10,
-    backgroundColor: '#007BFF'
-  },
-  loginButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-  },
-  errorText: { color: 'red', fontSize: 14, marginBottom: 10 },
-});
 
 export default LoginScreen;

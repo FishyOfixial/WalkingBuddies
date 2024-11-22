@@ -2,15 +2,16 @@ import React from 'react';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './screens/loginScreen';
+import LoginScreen from './screens/loginScreen.js';
 import RegisterScreen from './screens/registerScreen.js';
 import AskForBuddyScreen from './screens/askForBuddyScreen.js';
-import dashboardScreen from './screens/dashboardScreen.js';
-import historyScreen from './screens/historyScreen.js';
-import statScreen from './screens/statScreen.js';
-import profileScreen from './screens/profileScreen.js';
+import HistoryScreen from './screens/historyScreen.js';
+import StatScreen from './screens/statScreen.js';
+import ProfileScreen from './screens/profileScreen.js';
+import SlideInMenu from './screens/slideInMenuScreen.js';
 
 const Stack = createStackNavigator();
+
 
 export default function App() {
   return (
@@ -19,10 +20,10 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AskBuddy" component={AskForBuddyScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Dashboard" component={dashboardScreen} options={{headerShown: false}} />
-        <Stack.Screen name="Stats" component={statScreen} options={{headerShown: false}} />
-        <Stack.Screen name="History" component={historyScreen} options={{headerShown: false}} />
-        <Stack.Screen name="Profile" component={profileScreen} options={{headerShown: false}} />
+        <Stack.Screen name="Stats" component={StatScreen} options={{headerShown: false}} />
+        <Stack.Screen name="History" component={HistoryScreen} options={{headerShown: false}} />
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{headerShown: false}} />
+        <Stack.Screen name="SlideIn" component={SlideInMenu} options={{headerShown: false}} />
       </Stack.Navigator>
     </NavigationContainer>
   );

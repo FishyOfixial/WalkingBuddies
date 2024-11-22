@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Image, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, RefreshControl } from 'react-native';
+import { Animated, View, Text, TextInput, Image, ScrollView,ActivityIndicator , TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, RefreshControl } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { database, ref, set, get, auth } from './firebase';
 import { getAuth } from 'firebase/auth';
 import { update } from 'firebase/database';
+import styles from '../src/styles/askBuddyStyles';
+import SlideInMenu from './slideInMenuScreen';
+import { Picker } from '@react-native-picker/picker';
 
-
-
-const WalkingBuddyScreen = () => {
+const AskForBuddyScreen = () => {
     const initialState = { 
         description: "",
     };
@@ -17,8 +18,7 @@ const WalkingBuddyScreen = () => {
     const [selectedBuddy, setSelectedBuddy] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-
-
+    const [selectedDestination, setSelectedDestination] = useState('Edificio A');  // Estado para el destino
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -29,7 +29,7 @@ const WalkingBuddyScreen = () => {
                 const snapshot = await get(usersRef);
     
                 if (snapshot.exists()) {
-                    const filteredUser = Object.values(snapshot.val()).filter(user => user.isVolunteer === true && user.id !== userId && user.isInTrip === false);
+                    const filteredUser = Object.values(snapshot.val()).filter(user => user.isVolunteer === true && user.id !== userId && user.isInTrip === false && user.isVerified === true);
                     setUsers(filteredUser);
                 } else {
                     setUsers([]);
@@ -37,7 +37,7 @@ const WalkingBuddyScreen = () => {
             } catch (error) {
                 console.error('Error fetching users:', error);
             } finally {
-                setRefreshing(false); // Termina el refresco al completar la carga de usuarios
+                setRefreshing(false);
             }
         };
     
@@ -97,7 +97,8 @@ const WalkingBuddyScreen = () => {
                     tripId: tripId,
                     description: state.description,
                     userId: userId,
-                    walkingId: selectedBuddy,  // Aquí pasamos el compañero seleccionado
+                    walkingId: selectedBuddy,
+                    tripDestination: selectedDestination,
                 });
     
                 // Actualizar el estado del usuario para indicar que está en un viaje
@@ -119,14 +120,14 @@ const WalkingBuddyScreen = () => {
         setRefreshing(true); // Indica que está refrescando
         setRefresh(prev => !prev); // Cambia el estado de `refresh` para forzar la actualización
     };
-    
+
     
     return (
         <SafeAreaView style={styles.safeContainer}>
         <KeyboardAvoidingView 
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'android' ? 100 : 0} // Ajuste adicional en Android
+            keyboardVerticalOffset={Platform.OS === 'android' ? 100 : 0}
 
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}
@@ -135,16 +136,13 @@ const WalkingBuddyScreen = () => {
             }>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                 <View style={styles.innerContainer}>
-                <View style={styles.header}>
-                    <Text style={styles.headerText}>Walking Buddy</Text>
-                </View>
+                    <View style={styles.header}>
+                        <SlideInMenu/>
+                        <Text style={styles.headerText}>Walking Buddy</Text>
+                    </View>
 
                 <View style={styles.mapContainer}>
-                    <Image
-                    source={{ uri: 'https://via.placeholder.com/300x200' }}
-                    style={styles.mapImage}
-                    resizeMode="cover"
-                    />
+                    <DropdownBox selectedValue={selectedDestination} setSelectedValue={setSelectedDestination}/>
                 </View>
 
                 <View style={styles.usersContainer}>
@@ -190,167 +188,80 @@ const WalkingBuddyScreen = () => {
         </TouchableOpacity>
         </SafeAreaView>
     );
-    };
+};
 
-    // UserCard Component
-    const UserCard = ({ name, age, career, hobbies, rating, imageUri, userId, onSelect }) => {
-        return (
-            <TouchableOpacity style={styles.userCard} onPress={() => onSelect(userId)}>
-                <Image source={{ uri: imageUri }} style={styles.userImage} />
-                <View style={styles.userInfo}>
-                    <View style={styles.userTextContainer}>
-                        <Text style={styles.userText}><Text style={styles.boldText}>Nombre:</Text> {name}</Text>
-                        <Text style={styles.userText}><Text style={styles.boldText}>Edad:</Text> {age}</Text>
-                        <Text style={styles.userText}><Text style={styles.boldText}>Carrera:</Text> {career}</Text>
-                        <Text style={styles.userText}>
-                            <Text style={styles.boldText}>Gustos:</Text> {hobbies.split('\n').join(', ')}
-                        </Text>
-                    </View>
-                    <View style={styles.ratingContainer}>
-                        {[...Array(5)].map((_, index) => (
-                            <FontAwesome
-                                key={index}
-                                name="star"
-                                size={15}
-                                color={index >= 5 - rating ? "#FFD700" : "#ccc"}
-                            />
-                        ))}
-                    </View>
+const UserCard = ({ name, age, career, hobbies, rating, imageUri, userId, onSelect }) => {
+    return (
+        <TouchableOpacity style={styles.userCard} onPress={() => onSelect(userId)}>
+            <Image source={{ uri: imageUri }} style={styles.userImage} />
+            <View style={styles.userInfo}>
+                <View style={styles.userTextContainer}>
+                    <Text style={styles.userText}><Text style={styles.boldText}>Nombre:</Text> {name}</Text>
+                    <Text style={styles.userText}><Text style={styles.boldText}>Edad:</Text> {age}</Text>
+                    <Text style={styles.userText}><Text style={styles.boldText}>Carrera:</Text> {career}</Text>
+                    <Text style={styles.userText}>
+                        <Text style={styles.boldText}>Gustos:</Text> {hobbies.split('\n').join(', ')}
+                    </Text>
                 </View>
-            </TouchableOpacity>
-        );
-    };
-    
+                <View style={styles.ratingContainer}>
+                    {[...Array(5)].map((_, index) => (
+                        <FontAwesome
+                            key={index}
+                            name="star"
+                            size={15}
+                            color={index >= 5 - rating ? "#FFD700" : "#ccc"}
+                        />
+                    ))}
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+};
 
-    const styles = StyleSheet.create({
-    safeContainer: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    container: {
-        flex: 1,
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: 16,
-    },
-    innerContainer: {
-        flex: 1,
-        width: '100%',
-        alignItems: 'center',
-    },
-    header: {
-        width: '120%',
-        paddingVertical: 10,
-        backgroundColor: '#007BFF',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    headerText: {
-        fontSize: 24,
-        color: '#FFF',
-        fontWeight: 'bold',
-    },
-    mapContainer: {
-        width: '90%',
-        height: 200,
-        backgroundColor: '#d3d3d3',
-        marginBottom: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    mapImage: {
-        width: '100%',
-        height: '100%',
-    },
-    usersContainer: {
-        width: '90%',
-        marginBottom: 20,
-    },
-    userCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        marginBottom: 10,
-        backgroundColor: '#FFF',
-    },
-    userInfo: {
-        flexDirection: 'row',
-        flex: 1,
-        justifyContent: 'space-between',
-    },
-    userTextContainer: {
-        flex: 1,
-    },
-    userText: {
-        fontSize: 13,
-        color: '#333',
-        marginBottom: 4,
-    },
-    boldText: {
-        fontWeight: 'bold',
-    },
-    userImage: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-    },
-    ratingContainer: {
-        flexDirection: 'column',
-        alignItems: 'flex-end',
-    },
-    descriptionContainer: {
-        width: '90%',
-        height: 130,
-        marginBottom: 20,
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        backgroundColor: '#FFF',
-    },
-    descriptionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    descriptionText: {
-        marginTop: Platform.OS === 'android' ? '-5%' : 0,
-        fontSize: 16,
-        color: '#333',
-        height: '80%',
-    },
-    startButton: {
-        position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 50 : 20, // Ajusta la distancia para no tapar el borde de la pantalla
-        width: '60%',
-        paddingVertical: 10,
-        alignItems: 'center',
-        borderRadius: 10,
-        backgroundColor: '#007BFF',
-        alignSelf: 'center', // Centrado del botón
-    },
-    startButtonText: {
-        color: '#FFF',
-        fontSize: 18,
-    },
-    noUsersText: {
-        fontSize: 16,
-        color: '#333',
-        textAlign: 'center',
-        marginTop: 20,
-    },
-    refresh: {
-        marginTop: '-8%',
-        color: "#007BFF",
-        left: 125,
+const DropdownBox = ({selectedValue, setSelectedValue}) => {
 
-    }
-    });
+    // Lista de opciones
+    const options = [
+        { label: 'Cafetería', value: 'Cafeteria' },
+        { label: 'Biblioteca', value: 'Biblioteca' },
+        { label: 'Edificio A', value: 'Edificio A' },
+        { label: 'Edificio B', value: 'Edificio B' },
+        { label: 'Edificio C', value: 'Edificio C' },
+        { label: 'Edificio D', value: 'Edificio D' },
+        { label: 'Edificio E', value: 'Edificio E' },
+        { label: 'Edificio F', value: 'Edificio F' },
+        { label: 'Edificio G', value: 'Edificio G' },
+        { label: 'Edificio H', value: 'Edificio H' },
+        { label: 'Edificio I', value: 'Edificio I' },
+        { label: 'Edificio J', value: 'Edificio J' },
+        { label: 'Canchas', value: 'Canchas' },
+        { label: 'Gimnasio', value: 'Gimnasio' },
+        { label: 'Estadio 3 de Marzo', value: 'Estadio 3 de Marzo' },
+        { label: 'Estacionamientos', value: 'Estacionamientos' },
+        { label: 'Aula Magna', value: 'Aula Magna' },
+        { label: 'Gonvill', value: 'Gonvill' },
+        { label: 'UAG STORE', value: 'UAG STORE' },
+        { label: 'Arte y Cultura', value: 'Arte y Cultura' }
+    ];
 
-    export default WalkingBuddyScreen;
+    return (
+        <View style={styles.containerDrop}>
+            <Text style={styles.labelDrop}>Selecciona un destino:</Text>
+            <Picker
+                selectedValue={selectedValue}
+                onValueChange={itemValue => setSelectedValue(itemValue)}
+                style={styles.pickerDrop}
+            >
+                {options.map((option) => (
+                    <Picker.Item
+                        key={option.value}
+                        label={option.label}
+                        value={option.value}
+                    />
+                ))}
+            </Picker>
+        </View>
+    );
+};
+
+    export default AskForBuddyScreen;
