@@ -35,7 +35,6 @@ const LoginScreen = ({ navigation }) => {
         }
       })
       .catch((error) => {
-        // Error durante la autenticación
         if (error.code === 'auth/user-not-found') {
           setState(prevState => ({ ...prevState, errorText: "El usuario no existe" }));
         } else if (error.code === 'auth/wrong-password') {

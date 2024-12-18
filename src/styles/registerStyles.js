@@ -79,8 +79,11 @@ const registerStyles = StyleSheet.create({
       color: '#333',
     },
     loginBtn: {
-      width: '100%',
+      width: '80%',
       marginTop: 20,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
     errorText: {
       color: 'red',

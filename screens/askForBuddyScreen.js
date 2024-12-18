@@ -18,7 +18,7 @@ const AskForBuddyScreen = () => {
     const [selectedBuddy, setSelectedBuddy] = useState(false);
     const [refresh, setRefresh] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
-    const [selectedDestination, setSelectedDestination] = useState('Edificio A');  // Estado para el destino
+    const [selectedDestination, setSelectedDestination] = useState('Edificio A');
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -74,14 +74,11 @@ const AskForBuddyScreen = () => {
             if (snapshot.exists()) {
                 const user = snapshot.val();
 
-                console.log(selectedBuddy);
-                // Verificar si el usuario ya está en un viaje
                 if (user.isInTrip) {
                     alert("Ya tienes un viaje en curso. No puedes iniciar otro viaje hasta que termines el actual.");
-                    return; // No permitir que inicie un nuevo viaje
+                    return;
                 }
     
-                // Si no está en un viaje, permitir iniciar el viaje
                 if (!selectedBuddy) {
                     alert("Por favor, selecciona un compañero de caminata.");
                     return;
@@ -89,21 +86,19 @@ const AskForBuddyScreen = () => {
     
                 alert("Viaje iniciado");
     
-                // Crear un ID único para el viaje
                 const tripId = `id_${Date.now()}`;
                 
-                // Guardar el viaje en la base de datos
                 await set(ref(database, 'trips/' + tripId), {
                     tripId: tripId,
                     description: state.description,
                     userId: userId,
                     walkingId: selectedBuddy,
                     tripDestination: selectedDestination,
+                    date: Date.now().toString(),
                 });
     
-                // Actualizar el estado del usuario para indicar que está en un viaje
                 await update(ref(database, 'users/' + userId), {
-                    isInTrip: true, // Cambiar el estado de isInTrip a true
+                    isInTrip: true,
                 });
                 await update(ref(database, 'users/' + selectedBuddy),{
                     isInTrip: true,
@@ -117,8 +112,8 @@ const AskForBuddyScreen = () => {
     };
     
     const handleRefresh = () => {
-        setRefreshing(true); // Indica que está refrescando
-        setRefresh(prev => !prev); // Cambia el estado de `refresh` para forzar la actualización
+        setRefreshing(true);
+        setRefresh(prev => !prev);
     };
 
     
@@ -138,7 +133,7 @@ const AskForBuddyScreen = () => {
                 <View style={styles.innerContainer}>
                     <View style={styles.header}>
                         <SlideInMenu/>
-                        <Text style={styles.headerText}>Walking Buddy</Text>
+                        <Text style={styles.headerText}>Solicitar Viaje</Text>
                     </View>
 
                 <View style={styles.mapContainer}>
@@ -147,7 +142,7 @@ const AskForBuddyScreen = () => {
 
                 <View style={styles.usersContainer}>
                     {users.length === 0 ? (
-                    <Text style={styles.noUsersText}>No users available</Text>
+                    <Text style={styles.noUsersText}>No hay usuarios disponibles</Text>
                     ) : (
                     users.map((user, index) => (
                         <UserCard
@@ -166,23 +161,22 @@ const AskForBuddyScreen = () => {
                 </View>
 
 
-                <View style={styles.descriptionContainer}>
-                    <Text style={styles.descriptionTitle}>Descripción de la Caminata</Text>
-                    <TextInput 
-                    style={styles.descriptionText}
-                    placeholder='Escribe aquí'
-                    multiline={true}
-                    numberOfLines={4}
-                    value={state.description}
-                    onChangeText={(text) => setState(prevState => ({...prevState, description: text}))}
-                    />
-                </View>
+                    <View style={styles.descriptionContainer}>
+                        <Text style={styles.descriptionTitle}>Descripción de la Caminata</Text>
+                        <TextInput 
+                        style={styles.descriptionText}
+                        placeholder='Escribe aquí'
+                        multiline={true}
+                        numberOfLines={4}
+                        value={state.description}
+                        onChangeText={(text) => setState(prevState => ({...prevState, description: text}))}
+                        />
+                    </View>
                 </View>
             </TouchableWithoutFeedback>
             </ScrollView>
         </KeyboardAvoidingView>
 
-        {/* Botón de iniciar viaje fuera del ScrollView para que permanezca fijo */}
         <TouchableOpacity style={styles.startButton} onPress={beginTrip}>
             <Text style={styles.startButtonText}>Iniciar Viaje</Text>
         </TouchableOpacity>

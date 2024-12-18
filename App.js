@@ -9,6 +9,7 @@ import HistoryScreen from './screens/historyScreen.js';
 import StatScreen from './screens/statScreen.js';
 import ProfileScreen from './screens/profileScreen.js';
 import SlideInMenu from './screens/slideInMenuScreen.js';
+import ChangePasswordScreen from './screens/changePasswordScreen.js';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function App() {
         <Stack.Screen name="History" component={HistoryScreen} options={{headerShown: false}} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{headerShown: false}} />
         <Stack.Screen name="SlideIn" component={SlideInMenu} options={{headerShown: false}} />
+        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} options={{headerShown: false}} />
       </Stack.Navigator>
     </NavigationContainer>
   );

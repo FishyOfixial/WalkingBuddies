@@ -24,7 +24,7 @@ const SlideInMenu = ({}) => {
 
       setMenuVisible(true);
       Animated.timing(menuHeight, {
-        toValue: 250,
+        toValue: 200,
         duration: 300,
         useNativeDriver: false,
       }).start();
@@ -37,17 +37,11 @@ const SlideInMenu = ({}) => {
         case "Solicitar Viaje":
             navigation.navigate("AskBuddy");
             break;
-        case "Dashboard":
-            navigation.navigate("Login");
-            break;
         case "Historial":
-            navigation.navigate("Login");
+            navigation.navigate("History");
             break;
         case "Perfil":
-            navigation.navigate("Login");
-            break;
-        case "Ayuda":
-            navigation.navigate("Login");
+            navigation.navigate("Profile");
             break;
         case "Cerrar Sesión":
             navigation.navigate("Login");
@@ -69,7 +63,7 @@ const SlideInMenu = ({}) => {
                 <Animated.View
                     style={[styles.menu, { height: menuHeight, top: menuPosition.top, left: menuPosition.left }]}
                 >
-                {['Perfil', 'Solicitar Viaje', 'Historial',  'Ayuda', 'Cerrar Sesión'].map((item) => (
+                {['Perfil', 'Solicitar Viaje', 'Historial', 'Cerrar Sesión'].map((item) => (
                     <TouchableOpacity key={item} onPress={() => handleItemPress(item)}>
                             <Text style={[styles.menuItem,selectedItem === item && styles.selectedItem,]}>
                                 {item}

@@ -21,7 +21,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const [state, setState] = useState(initialState);
   const [showPicker, setShowPicker] = useState(false);
-  const [date, setDate] = useState(new Date(2006,2,8));
+  const [date, setDate] = useState(new Date(2000,1,1));
   const [isVolunteer, setIsVolunteer] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
 
@@ -31,15 +31,12 @@ const RegisterScreen = ({ navigation }) => {
   
     if (!errorMessage) {
       try {
-        // Aquí usamos `createUserWithEmailAndPassword` directamente con el objeto `auth`
         const userCredential = await createUserWithEmailAndPassword(auth, state.email, state.password);
         const user = userCredential.user;
   
-        // Enviar verificación de correo electrónico
         await sendEmailVerification(user);
         alert("Correo de verificación enviado. Por favor, revisa tu bandeja de entrada.");
   
-        // Guardar el usuario en la base de datos después de la verificación
         const userId = user.uid;
         const age = calculateAge(state.dateOfBirth);
         await set(ref(database, 'users/' + userId), {
@@ -57,7 +54,6 @@ const RegisterScreen = ({ navigation }) => {
           isVerified: false,
         });
   
-        // Redirigir al usuario a la pantalla de inicio de sesión
         navigation.navigate("Login");
   
       } catch (error) {
@@ -72,6 +68,9 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
   
+  const returnClick = () => {
+    navigation.navigate("Login");
+  }
 
   const showDatePicker = () => {
     setShowPicker(true);
@@ -130,7 +129,6 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
 
-  // Calcular la edad
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
     if (isNaN(birthDate)) {
@@ -228,6 +226,7 @@ const RegisterScreen = ({ navigation }) => {
             )}
 
             <View style={styles.loginBtn}>
+              <Button title="Regresar" onPress={returnClick} />
               <Button title="Registrar" onPress={loginClick} />
             </View>
           </View>
