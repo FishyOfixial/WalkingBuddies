@@ -50,8 +50,11 @@ const RegisterScreen = ({ navigation }) => {
           profileImage: profileImage || require('../assets/Fishy-Mando.png'),
           rating: 0,
           isVolunteer: isVolunteer,
-          isInTrip: false,
           isVerified: false,
+          reviews: 0,
+          status: {
+            isInTrip: false,
+          }
         });
   
         navigation.navigate("Login");

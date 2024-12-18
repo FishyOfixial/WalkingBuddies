@@ -110,15 +110,15 @@ const askBuddyStyles = StyleSheet.create({
         color: '#333',
         height: '80%',
     },
-    startButton: {
+    Button: {
         position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 50 : 20, // Ajusta la distancia para no tapar el borde de la pantalla
+        bottom: Platform.OS === 'ios' ? 50 : 20,
         width: '60%',
         paddingVertical: 10,
         alignItems: 'center',
         borderRadius: 10,
         backgroundColor: '#007BFF',
-        alignSelf: 'center', // Centrado del botón
+        alignSelf: 'center',
     },
     startButtonText: {
         color: '#FFF',
@@ -156,6 +156,44 @@ const askBuddyStyles = StyleSheet.create({
         marginTop: 50,
         paddingBottom: 100,
     },
+    tripDetailsContainer: {
+        marginBottom: 20,
+        marginTop: 10,
+        width: '100%',
+        backgroundColor: '#fff',
+        paddingLeft: 20,
+        height: 'auto',
+        borderRadius: 10
+    },
+    tripDetailText: {
+        fontSize: 16,
+        marginVertical: 5,
+        color: '#333',
+    },
+    ratingContainerEndTrip: {
+        backgroundColor: '#fff',
+        width: '100%',
+        marginTop: 20,
+        alignItems: 'center',
+        height: '100',
+        justifyContent: 'center',
+        borderRadius: 10
+    },
+    ratingTitle: {
+        fontSize: 18,
+        marginBottom: 10,
+    },
+    starsContainer: {
+        flexDirection: 'row', 
+        justifyContent: 'center',
+        marginBottom: 20,
+    },
+    star: {
+        marginHorizontal: 2,
+    },
+    endTripButton: {
+        bottom: 10
+    }
 });
 
 export default askBuddyStyles;
